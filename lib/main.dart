@@ -1,91 +1,141 @@
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() {
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-  static const String _title = 'Flutter Stateful Clicker Counter';
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
+      debugShowCheckedModeBanner: false,
+      title: 'IMC Calculator',
       theme: ThemeData(
-        // useMaterial3: false,
         primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const MyHomePage(),
+      home: IMCCalculator(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-  // This class is the configuration for the state.
+class IMCCalculator extends StatefulWidget {
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _IMCCalculatorState createState() => _IMCCalculatorState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _IMCCalculatorState extends State<IMCCalculator> {
+  double _peso = 0;
+  double _altura = 0;
+  double _imc = 0;
 
-  void _incrementCounter() {
+  void setPeso(double value) {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _peso = value;
     });
+  }
+
+  void setAltura(double value) {
+    setState(() {
+      _altura = value;
+    });
+  }
+
+  void calculateImc() {
+    if (_peso > 0 && _altura > 0) {
+      setState(() {
+        _imc = _peso / (_altura * _altura);
+      });
+    }
+  }
+
+  String getStatus() {
+    if (_imc < 18.5) {
+      return 'Abaixo do Peso';
+    } else if (_imc >= 18.5 && _imc < 25) {
+      return 'Peso Ideal';
+    } else if (_imc >= 25 && _imc < 30) {
+      return 'Acima do Peso';
+    } else if (_imc >= 30) {
+      return 'Obesidade';
+    }
+    return '';
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: const Text('Flutter Demo Click Counter'),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+        title: Text('IMC Calculator', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.blue,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Colors.blue, Colors.red],
             ),
+          ),
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            TextField(
+              decoration: InputDecoration(
+                labelText: 'Peso (kg)',
+                border: OutlineInputBorder(),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+              ),
+              onChanged: (value) {
+                setPeso(double.parse(value));
+              },
+            ),
+            SizedBox(height: 20),
+            TextField(
+              decoration: InputDecoration(
+                labelText: 'Altura (m)',
+                border: OutlineInputBorder(),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+              ),
+              onChanged: (value) {
+                setAltura(double.parse(value));
+              },
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              child: Text('Calcular', style: TextStyle(color: Colors.white)),
+              onPressed: () {
+                calculateImc();
+              },
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.blue[900]),
+                overlayColor: MaterialStateProperty.resolveWith<Color>(
+                  (Set<MaterialState> states) {
+                    if (states.contains(MaterialState.pressed))
+                      return Colors.red;
+                    return Colors.blue; 
+                  },
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
             Text(
-              '$_counter',
-              style: const TextStyle(fontSize: 25),
+              '$_imc',
+              style: TextStyle(fontSize: 24, color: Colors.black),
+            ),
+            SizedBox(height: 20),
+            Text(
+              '${getStatus()}',
+              style: TextStyle(fontSize: 18, color: Colors.black),
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }
